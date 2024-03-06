@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+   db:
+     image: mariadb:${DB_IMAGE_TAG}
+     container_name: database_mysql
+     volumes:
+       - ./mariadb_vol:/var/lib/mysql
+     restart: always
+     networks:
+        - wordpress_net
+     environment:
+       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       MYSQL_DATABASE: ${MYSQL_DATABASE}
+       MYSQL_USER: ${MYSQL_USER}
+       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+   wordpress:
+     image: wordpress:${WORDPRES_IMAGE_TAG}
+     container_name: wordpress
+     depends_on:
+      - db
+     ports:
+       - "8080:80"
+     restart: always
+     volumes:
+        - ./wordpress_vol:/var/www/html
+     networks:
+        - wordpress_net
+     environment:
+       WORDPRESS_DB_HOST: db:${MYSQL_PORT}
+       WORDPRESS_DB_USER: ${MYSQL_USER}
+       WORDPRESS_DB_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+
+
+volumes:
+  mariadb_vol: {}
+  wordpress_vol: {}
+
+networks:
+    wordpress_net:
+      driver: bridge
